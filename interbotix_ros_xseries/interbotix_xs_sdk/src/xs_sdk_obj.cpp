@@ -421,9 +421,16 @@ void InterbotixRobotXS::robot_execute_trajectory()
     }
 
     // get the length of time the timer should be if perfect
-    rclcpp::Duration period = std::chrono::nanoseconds(
-      joint_traj_cmd->traj.points[cntr].time_from_start.nanosec -
-      joint_traj_cmd->traj.points[cntr - 1].time_from_start.nanosec);
+    // rclcpp::Duration period = std::chrono::nanoseconds(
+    //   joint_traj_cmd->traj.points[cntr].time_from_start.nanosec -
+    //   joint_traj_cmd->traj.points[cntr - 1].time_from_start.nanosec);
+
+    int64_t current_ns = (int64_t)joint_traj_cmd->traj.points[cntr].time_from_start.sec * 1000000000LL + 
+                      joint_traj_cmd->traj.points[cntr].time_from_start.nanosec;
+    int64_t previous_ns = (int64_t)joint_traj_cmd->traj.points[cntr - 1].time_from_start.sec * 1000000000LL + 
+                        joint_traj_cmd->traj.points[cntr - 1].time_from_start.nanosec;
+
+    rclcpp::Duration period = std::chrono::nanoseconds(current_ns - previous_ns);
 
     // create new timer with the actual length of time it should execute
     //  (period - (now - start_of_callback))
